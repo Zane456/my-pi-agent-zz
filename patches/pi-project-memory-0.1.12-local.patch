@@ -1,0 +1,50 @@
+--- a/index.ts
++++ b/index.ts
+@@ -66,7 +66,8 @@
+ const RECALL_MESSAGE = "pi-project-memory-recall";
+ const UPDATE_MESSAGE = "pi-project-memory-update";
+ const RECALL_BUDGET = 61_440;
+-const RECALL_PREFETCH_DEADLINE_MS = 2_000;
++// Local patch: never block sending; recalled topics arrive later in the run or with the next prompt.
++const RECALL_PREFETCH_DEADLINE_MS = 0;
+ const USAGE_KEY = Symbol.for("pi-project-memory.backgroundUsage");
+ type BackgroundUsage = Record<"selector" | "extractor" | "dream", Usage>;
+ 
+@@ -250,8 +251,13 @@
+ 		const paths = state.paths;
+ 		const normalized = query.trim();
+ 		// Claude C7r's traditional selector requires whitespace inside the trimmed query.
+-		// Its CJK exception shares the BM25 gate, which this extension excludes.
+-		if (!paths || !/\s/.test(normalized) || state.recallBytes >= RECALL_BUDGET || !ctx.isProjectTrusted())
++		// Local patch: CJK text has no spaces, so count ICU-segmented words instead.
++		if (
++			!paths ||
++			(!/\s/.test(normalized) && cjkWordCount(normalized) < 2) ||
++			state.recallBytes >= RECALL_BUDGET ||
++			!ctx.isProjectTrusted()
++		)
+ 			return undefined;
+ 		const controller = new AbortController();
+ 		const preparation = captureExternalMemoryChanges(state);
+@@ -1072,9 +1078,20 @@
+ 	).trim();
+ }
+ 
++// Local patch: whitespace splitting sees a whole CJK sentence as one word.
++const CJK_TEXT = /[\p{Script=Han}\p{Script=Hiragana}\p{Script=Katakana}\p{Script=Hangul}]/u;
++const WORD_SEGMENTER = new Intl.Segmenter(undefined, { granularity: "word" });
++
++function cjkWordCount(text: string): number {
++	if (!CJK_TEXT.test(text)) return 0;
++	let count = 0;
++	for (const segment of WORD_SEGMENTER.segment(text)) if (segment.isWordLike) count++;
++	return count;
++}
++
+ function hasUserProse(messages: AgentMessage[]): boolean {
+ 	// Claude Ie/Le checks each string or text block separately, without CJK segmentation.
+-	const hasThreeWords = (text: string) => text.split(/\s+/).filter(Boolean).length >= 3;
++	const hasThreeWords = (text: string) => text.split(/\s+/).filter(Boolean).length >= 3 || cjkWordCount(text) >= 3;
+ 	return messages.some(
+ 		(message) =>
+ 			message.role === "user" &&

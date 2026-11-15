@@ -1,0 +1,42 @@
+{
+  "defaultProvider": "zai",
+  "defaultModel": "glm-5.3",
+  "enabledModels": [
+    "zai/glm-5.3",
+    "zai/glm-5.3-flash"
+  ],
+  "theme": "blue",
+  "quietStartup": "header",
+  "defaultTools": [
+    "+grep",
+    "+find",
+    "+ls",
+    "+tool_search",
+    "+codemode"
+  ],
+  "packages": [
+    "npm:pi-subagents",
+    "npm:pi-web-access",
+    "npm:pi-project-memory@0.1.12",
+    "npm:pi-multi-account",
+    "npm:cc-safety-net",
+    "npm:pi-context-breadcrumbs",
+    "npm:@quintinshaw/pi-dynamic-workflows"
+  ],
+  "skills": [
+    "~/.claude/skills/skill-checkup",
+    "~/.claude/skills/harness-check"
+  ],
+  "compaction": {
+    "modelOverrides": {
+      "zai/glm-5.3": { "reserveTokens": 800000 },
+      "zai/glm-5.3-flash": { "reserveTokens": 800000 }
+    }
+  },
+  "lastChangelogVersion": "1.5.2",
+  "extensionChangelogVersions": {
+    "{\"source\":\"npm:pi-subagents\",\"scope\":\"user\"}": "0.88.1",
+    "{\"source\":\"npm:pi-web-access\",\"scope\":\"user\"}": "0.47.0",
+    "{\"source\":\"npm:pi-multi-account\",\"scope\":\"user\"}": "1.28.1"
+  }
+}
