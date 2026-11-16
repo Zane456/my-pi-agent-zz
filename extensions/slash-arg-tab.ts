@@ -5,9 +5,8 @@
  */
 
 import { existsSync, readdirSync } from "node:fs";
-import { homedir } from "node:os";
 import { join } from "node:path";
-import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
+import { type ExtensionAPI, getAgentDir } from "@earendil-works/pi-coding-agent";
 
 type Choice = [value: string, description: string];
 
@@ -59,8 +58,8 @@ const CHOICES: Record<string, Choice[]> = {
 
 function promptWorkflowChoices(): Choice[] {
 	const dirs = [
-		join(homedir(), ".pi/agent/npm/node_modules/pi-subagents/prompts"),
-		join(homedir(), ".pi/agent/prompts"),
+		join(getAgentDir(), "npm/node_modules/pi-subagents/prompts"),
+		join(getAgentDir(), "prompts"),
 	];
 	const names = new Set<string>();
 	for (const dir of dirs) {

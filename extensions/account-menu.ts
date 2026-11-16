@@ -5,9 +5,8 @@
  */
 
 import { readFileSync } from "node:fs";
-import { homedir } from "node:os";
 import { join } from "node:path";
-import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
+import { type ExtensionAPI, getAgentDir } from "@earendil-works/pi-coding-agent";
 
 const SWITCH = "switch";
 const ADD = "add";
@@ -51,7 +50,7 @@ function accountLabel(id: string): string {
 
 /** Logged-in account ids (auth.json keys) minus excluded providers. Reads names only. */
 function loggedInAccounts(): string[] {
-	const dir = join(homedir(), ".pi/agent");
+	const dir = getAgentDir();
 	try {
 		const ids = Object.keys(JSON.parse(readFileSync(join(dir, "auth.json"), "utf8")));
 		let excluded: string[] = [];
